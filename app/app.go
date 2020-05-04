@@ -4,22 +4,22 @@ import (
 	"fmt"
 
 	"github.com/desertbit/grumble"
-	"github.com/divjotarora/todo-cli/api"
 	"github.com/divjotarora/todo-cli/command"
+	"github.com/divjotarora/todo-cli/todoist"
 )
 
 // App is the main application that facilitates command line interactions.
 type App struct {
 	*grumble.App
 
-	apiClient  *api.Client
+	apiClient  *todoist.Client
 	parser     *command.Parser
 	commandCtx *command.Context
 }
 
 // NewApp creates a new command line application.
 func NewApp() (*App, error) {
-	apiClient, err := api.NewClient()
+	apiClient, err := todoist.NewClient()
 	if err != nil {
 		return nil, fmt.Errorf("error creating API client: %v", err)
 	}
@@ -37,13 +37,45 @@ func NewApp() (*App, error) {
 
 	for _, cmd := range newApp.parser.Commands() {
 		newApp.AddCommand(&grumble.Command{
-			Name: cmd.Name(),
-			Help: cmd.Help(),
+			Name:      cmd.Name(),
+			Help:      cmd.Help(),
+			Usage:     cmd.Usage(),
+			AllowArgs: true,
+			Flags: func(grumbleFlags *grumble.Flags) {
+				for _, flag := range cmd.Flags() {
+					grumbleFlags.String(flag.ShortName, flag.LongName, flag.DefaultValue, flag.Description)
+				}
+			},
 			Run: func(ctx *grumble.Context) error {
-				return cmd.Execute(newApp.commandCtx, newApp.apiClient, ctx.Args...)
+				var flagsMap map[string]string
+				if len(ctx.Flags) > 0 {
+					flagsMap = make(map[string]string)
+					for key, value := range ctx.Flags {
+						if stringValue, ok := value.Value.(string); ok {
+							flagsMap[key] = stringValue
+						}
+					}
+				}
+				args := command.Arguments{
+					PositionalArgs: ctx.Args,
+					Flags:          flagsMap,
+				}
+
+				return cmd.Execute(newApp.commandCtx, newApp.apiClient, args)
 			},
 		})
 	}
+
+	newApp.OnInit(func(*grumble.App, grumble.FlagMap) error {
+		projects, err := newApp.apiClient.Projects()
+		if err != nil {
+			return fmt.Errorf("error getting initial project list: %v", err)
+		}
+
+		newApp.commandCtx.SetProjectListing(projects)
+		Display(newApp.commandCtx)
+		return nil
+	})
 
 	return newApp, nil
 }
