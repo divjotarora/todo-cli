@@ -33,12 +33,17 @@ func (c *Context) SetProject(project *todoist.Project) {
 
 // SetProjectListing sets the current listing to a slice of projects.
 func (c *Context) SetProjectListing(projects []*todoist.Project) {
-	nameable := make([]ListItem, 0, len(projects))
+	items := make([]ListItem, 0, len(projects))
 	for _, p := range projects {
-		nameable = append(nameable, p)
+		items = append(items, p)
 	}
 
-	c.currentListing = nameable
+	c.currentListing = items
+}
+
+// SetTaskListing sets the current listing to a slice of tasks.
+func (c *Context) SetTaskListing(tasks []*todoist.Task) {
+	c.currentListing = newTaskListItems(tasks)
 }
 
 // CurrentListing returns the current list of items associated with the Context.

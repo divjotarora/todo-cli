@@ -61,7 +61,11 @@ func NewApp() (*App, error) {
 					Flags:          flagsMap,
 				}
 
-				return cmd.Execute(newApp.commandCtx, newApp.apiClient, args)
+				if err = cmd.Execute(newApp.commandCtx, newApp.apiClient, args); err != nil {
+					return err
+				}
+				Display(newApp.commandCtx)
+				return nil
 			},
 		})
 	}

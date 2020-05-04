@@ -48,5 +48,5 @@ func (s *selectProject) Execute(ctx *Context, client *todoist.Client, args Argum
 	}
 
 	ctx.SetProject(projects[index])
-	return nil
+	return GetTasks.Execute(ctx, client, Arguments{})
 }
