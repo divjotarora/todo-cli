@@ -17,6 +17,11 @@ func (p *Project) Name() string {
 	return p.name
 }
 
+// ID returns the project's ID.
+func (p *Project) ID() int64 {
+	return p.id
+}
+
 type unmarshalTask struct {
 	ID      int64
 	Parent  *int64

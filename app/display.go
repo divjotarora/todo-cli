@@ -3,24 +3,30 @@ package app
 import (
 	"fmt"
 
+	"github.com/cevaris/ordered_map"
 	"github.com/divjotarora/todo-cli/command"
 )
 
 // Display prints a list of Nameable instances to the console.
 func Display(ctx *command.Context) {
-	displayHelper(ctx.CurrentListing(), "")
+	displayHelper(ctx.CurrentListing().Items(), "")
 }
 
-func displayHelper(items []command.ListItem, prefix string) {
-	for idx, item := range items {
-		fmt.Printf("%v%v. %v\n", prefix, idx, item.Name())
+func displayHelper(items *ordered_map.OrderedMap, prefix string) {
+	iter := items.IterFunc()
 
-		nested, ok := item.(command.NestedListItem)
+	var idx int
+	for {
+		kv, ok := iter()
 		if !ok {
-			continue
+			break
 		}
 
-		if children := nested.Children(); len(children) > 0 {
+		item := kv.Value.(command.ListItem)
+		fmt.Printf("%v%v. %v\n", prefix, idx, item.Name())
+		idx++
+
+		if children := item.Children(); children.Len() > 0 {
 			displayHelper(children, prefix+"  ")
 		}
 	}
