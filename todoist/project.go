@@ -19,11 +19,11 @@ func (p *Project) Name() string {
 
 type unmarshalTask struct {
 	ID      int64
-	Parent  int64
+	Parent  *int64
 	Content string
 }
 
-func (p *Project) newTask(temp unmarshalTask) *Task {
+func (p *Project) newTask(temp *unmarshalTask) *Task {
 	return &Task{
 		name:   temp.Content,
 		id:     temp.ID,
@@ -39,14 +39,24 @@ func (p *Project) Tasks() ([]*Task, error) {
 		return nil, newError(err)
 	}
 
-	var unmarshalled []unmarshalTask
+	var unmarshalled []*unmarshalTask
 	if err = json.Unmarshal(res, &unmarshalled); err != nil {
 		return nil, newError(err)
 	}
 
-	tasks := make([]*Task, 0, len(unmarshalled))
+	tasksMap := make(map[int64]*Task)
+	var tasks []*Task
 	for _, temp := range unmarshalled {
-		tasks = append(tasks, p.newTask(temp))
+		newTask := p.newTask(temp)
+		tasksMap[newTask.id] = newTask
+
+		if temp.Parent == nil {
+			tasks = append(tasks, newTask)
+			continue
+		}
+
+		parent := tasksMap[*temp.Parent]
+		parent.subtasks = append(parent.subtasks, newTask)
 	}
 
 	return tasks, nil

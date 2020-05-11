@@ -17,3 +17,5 @@ func (t *Task) Name() string {
 func (t *Task) Subtasks() []*Task {
 	return t.subtasks
 }
+
+// Close closes a task.

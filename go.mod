@@ -1,4 +1,4 @@
-module todo-cli
+module github.com/divjotarora/todo-cli
 
 go 1.13
 

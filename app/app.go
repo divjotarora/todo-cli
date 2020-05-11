@@ -36,6 +36,8 @@ func NewApp() (*App, error) {
 	}
 
 	for _, cmd := range newApp.parser.Commands() {
+		cmd := cmd
+
 		newApp.AddCommand(&grumble.Command{
 			Name:      cmd.Name(),
 			Help:      cmd.Help(),

@@ -21,7 +21,7 @@ func (t *taskListItem) Children() []ListItem {
 func newTaskListItems(tasks []*todoist.Task) []ListItem {
 	items := make([]ListItem, 0, len(tasks))
 	for _, task := range tasks {
-		items = append(items, taskListItem{task})
+		items = append(items, &taskListItem{task})
 	}
 	return items
 }
