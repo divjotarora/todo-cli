@@ -1,5 +1,7 @@
 package todoist
 
+import "fmt"
+
 // Task represents a task in a project.
 type Task struct {
 	name     string
@@ -25,5 +27,11 @@ func (t *Task) Subtasks() []*Task {
 
 // Close closes a task.
 func (t *Task) Close() error {
+	endpoint := fmt.Sprintf("tasks/%d/close", t.id)
+	_, err := t.client.httpPost(endpoint, nil)
+	if err != nil {
+		return newError(err)
+	}
+
 	return nil
 }

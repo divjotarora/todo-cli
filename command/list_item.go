@@ -1,8 +1,11 @@
 package command
 
 import (
-	"github.com/cevaris/ordered_map"
+	"fmt"
+	"strconv"
+
 	"github.com/divjotarora/todo-cli/todoist"
+	"github.com/elliotchance/orderedmap"
 )
 
 // ListItem TODO
@@ -10,18 +13,18 @@ type ListItem interface {
 	Name() string
 	ID() int64
 	Close() error
-	Children() *ordered_map.OrderedMap
+	Children() *orderedmap.OrderedMap
 	Parent() ListItem
 }
 
 // List TODO
 type List struct {
-	allItems *ordered_map.OrderedMap
+	allItems *orderedmap.OrderedMap
 }
 
 func newList() *List {
 	return &List{
-		allItems: ordered_map.NewOrderedMap(),
+		allItems: orderedmap.NewOrderedMap(),
 	}
 }
 
@@ -33,7 +36,7 @@ func newListFromTasks(tasks []*todoist.Task) *List {
 
 		for _, subtask := range task.Subtasks() {
 			childItem := newTaskListItem(subtask, taskItem)
-			taskItem.children.Set(subtask.ID(), childItem)
+			taskItem.Children().Set(subtask.ID(), childItem)
 		}
 	}
 
@@ -49,6 +52,20 @@ func newListFromProjects(projects []*todoist.Project) *List {
 	return list
 }
 
+// Get TODO
+func (l *List) Get(index string) (ListItem, error) {
+	converted, err := strconv.Atoi(index)
+	if err != nil {
+		return nil, fmt.Errorf("invalid index %s: %v", index, err)
+	}
+
+	_, val, ok := l.allItems.GetIndex(converted)
+	if !ok {
+		return nil, fmt.Errorf("invalid index %s", index)
+	}
+	return val.(ListItem), nil
+}
+
 // Delete TODO
 func (l *List) Delete(item ListItem) {
 	parent := item.Parent()
@@ -61,32 +78,6 @@ func (l *List) Delete(item ListItem) {
 }
 
 // Items TODO
-func (l *List) Items() *ordered_map.OrderedMap {
+func (l *List) Items() *orderedmap.OrderedMap {
 	return l.allItems
 }
-
-// // Iterator TODO
-// type Iterator struct {
-// 	iter func() (*ordered_map.KVPair, bool)
-// 	done bool
-// }
-
-// // Next TODO
-// func (i *Iterator) Next() ListItem {
-// 	if i.done {
-// 		return nil
-// 	}
-
-// 	kv, ok := i.iter()
-// 	if !ok {
-// 		return nil
-// 	}
-// 	return kv.Value.(ListItem)
-// }
-
-// // Iterator TODO
-// func (l *List) Iterator() *Iterator {
-// 	return &Iterator{
-// 		iter: l.allItems.IterFunc(),
-// 	}
-// }

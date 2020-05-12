@@ -1,28 +1,28 @@
 package command
 
 import (
-	"github.com/cevaris/ordered_map"
 	"github.com/divjotarora/todo-cli/todoist"
+	"github.com/elliotchance/orderedmap"
 )
 
 type taskListItem struct {
 	*todoist.Task
 
-	parent   *taskListItem
-	children *ordered_map.OrderedMap
+	parent   ListItem
+	children *orderedmap.OrderedMap
 }
 
 var _ ListItem = (*taskListItem)(nil)
 
-func newTaskListItem(task *todoist.Task, parent *taskListItem) *taskListItem {
+func newTaskListItem(task *todoist.Task, parent ListItem) ListItem {
 	return &taskListItem{
 		Task:     task,
 		parent:   parent,
-		children: ordered_map.NewOrderedMap(),
+		children: orderedmap.NewOrderedMap(),
 	}
 }
 
-func (t *taskListItem) Children() *ordered_map.OrderedMap {
+func (t *taskListItem) Children() *orderedmap.OrderedMap {
 	return t.children
 }
 

@@ -1,21 +1,21 @@
 package command
 
 import (
-	"github.com/cevaris/ordered_map"
 	"github.com/divjotarora/todo-cli/todoist"
+	"github.com/elliotchance/orderedmap"
 )
 
 type projectListItem struct {
 	*todoist.Project
-	children *ordered_map.OrderedMap
+	children *orderedmap.OrderedMap
 }
 
 var _ ListItem = (*projectListItem)(nil)
 
-func newProjectListItem(project *todoist.Project) *projectListItem {
+func newProjectListItem(project *todoist.Project) ListItem {
 	return &projectListItem{
 		Project:  project,
-		children: ordered_map.NewOrderedMap(),
+		children: orderedmap.NewOrderedMap(),
 	}
 }
 
@@ -23,7 +23,7 @@ func (p *projectListItem) Close() error {
 	return nil
 }
 
-func (p *projectListItem) Children() *ordered_map.OrderedMap {
+func (p *projectListItem) Children() *orderedmap.OrderedMap {
 	return p.children
 }
 

@@ -5,5 +5,6 @@ func attach(p *Parser) {
 		CreateTask,
 		SelectProject,
 		GetTasks,
+		CloseTask,
 	)
 }
