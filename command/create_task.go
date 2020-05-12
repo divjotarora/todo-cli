@@ -30,5 +30,30 @@ func (c *createTask) Flags() []Flag {
 }
 
 func (c *createTask) Execute(ctx *Context, client *todoist.Client, args Arguments) error {
+	if len(args.PositionalArgs) != 1 {
+		return invalidNumberOfArguments(c, 1, len(args.PositionalArgs))
+	}
+
+	project := ctx.selectedProject
+	content := args.PositionalArgs[0]
+	var parentTask ListItem
+	var created *todoist.Task
+	var err error
+
+	if subtaskIndex := args.Flags.String("subtask"); subtaskIndex != "" {
+		parentTask, err = ctx.currentListing.Get(subtaskIndex)
+		if err != nil {
+			return err
+		}
+
+		created, err = project.CreateSubTask(content, parentTask.ID())
+	} else {
+		created, err = project.CreateTask(content)
+	}
+	if err != nil {
+		return err
+	}
+
+	ctx.AddTask(created, parentTask)
 	return nil
 }

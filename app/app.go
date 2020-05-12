@@ -49,18 +49,9 @@ func NewApp() (*App, error) {
 				}
 			},
 			Run: func(ctx *grumble.Context) error {
-				var flagsMap map[string]string
-				if len(ctx.Flags) > 0 {
-					flagsMap = make(map[string]string)
-					for key, value := range ctx.Flags {
-						if stringValue, ok := value.Value.(string); ok {
-							flagsMap[key] = stringValue
-						}
-					}
-				}
 				args := command.Arguments{
 					PositionalArgs: ctx.Args,
-					Flags:          flagsMap,
+					Flags:          ctx.Flags,
 				}
 
 				if err = cmd.Execute(newApp.commandCtx, newApp.apiClient, args); err != nil {

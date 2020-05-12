@@ -30,6 +30,17 @@ func (c *Context) SetTaskListing(tasks []*todoist.Task) {
 	c.currentListing = newListFromTasks(tasks)
 }
 
+// AddTask adds a task to the current listing.
+func (c *Context) AddTask(task *todoist.Task, parent ListItem) {
+	item := newTaskListItem(task, parent)
+	if parent != nil {
+		parent.Children().Set(item.ID(), item)
+		return
+	}
+
+	c.currentListing.allItems.Set(item.ID(), item)
+}
+
 // CurrentListing returns the current list of items associated with the Context.
 func (c *Context) CurrentListing() *List {
 	return c.currentListing

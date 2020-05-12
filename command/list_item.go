@@ -3,6 +3,7 @@ package command
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/divjotarora/todo-cli/todoist"
 	"github.com/elliotchance/orderedmap"
@@ -54,16 +55,25 @@ func newListFromProjects(projects []*todoist.Project) *List {
 
 // Get TODO
 func (l *List) Get(index string) (ListItem, error) {
-	converted, err := strconv.Atoi(index)
-	if err != nil {
-		return nil, fmt.Errorf("invalid index %s: %v", index, err)
-	}
+	indexes := strings.Split(index, ".")
 
-	_, val, ok := l.allItems.GetIndex(converted)
-	if !ok {
-		return nil, fmt.Errorf("invalid index %s", index)
+	currentItems := l.allItems
+	var selectedItem ListItem
+	for _, indexStr := range indexes {
+		convertedIdx, err := strconv.Atoi(indexStr)
+		if err != nil || convertedIdx < 0 || convertedIdx >= currentItems.Len() {
+			return nil, fmt.Errorf("invalid index %s", indexStr)
+		}
+
+		_, val, ok := currentItems.GetIndex(convertedIdx)
+		if !ok {
+			return nil, fmt.Errorf("invalid index %s", indexStr)
+		}
+
+		selectedItem = val.(ListItem)
+		currentItems = selectedItem.Children()
 	}
-	return val.(ListItem), nil
+	return selectedItem, nil
 }
 
 // Delete TODO

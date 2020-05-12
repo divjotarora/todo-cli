@@ -66,3 +66,34 @@ func (p *Project) Tasks() ([]*Task, error) {
 
 	return tasks, nil
 }
+
+// CreateTask creates a new task in this project.
+func (p *Project) CreateTask(content string) (*Task, error) {
+	return p.createTask(content, nil)
+}
+
+// CreateSubTask creates a new subtask under the provided parent ID.
+func (p *Project) CreateSubTask(content string, parentTaskID int64) (*Task, error) {
+	return p.createTask(content, &parentTaskID)
+}
+
+func (p *Project) createTask(content string, parent *int64) (*Task, error) {
+	postBody := map[string]interface{}{
+		"content":    content,
+		"project_id": p.id,
+	}
+	if parent != nil {
+		postBody["parent"] = *parent
+	}
+
+	res, err := p.client.httpPost("tasks", postBody)
+	if err != nil {
+		return nil, newError(err)
+	}
+
+	var unmarshalled *unmarshalTask
+	if err = json.Unmarshal(res, &unmarshalled); err != nil {
+		return nil, newError(err)
+	}
+	return p.newTask(unmarshalled), nil
+}

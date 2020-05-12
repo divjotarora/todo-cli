@@ -10,10 +10,16 @@ type Flag struct {
 	Description  string
 }
 
+// Flags represents an interface to retrieve command line flags. Each method corresponds a Go type. The implementation
+// should return the flag value corresponding to the provided flag name as that type.
+type Flags interface {
+	String(flagName string) string
+}
+
 // Arguments represents the inputs for a command.
 type Arguments struct {
 	PositionalArgs []string
-	Flags          map[string]string
+	Flags          Flags
 }
 
 // Command repesents a command that can be executed.
