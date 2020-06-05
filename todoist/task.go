@@ -6,6 +6,7 @@ import "fmt"
 type Task struct {
 	name     string
 	id       int64
+	parentID *int64
 	subtasks []*Task
 	client   *Client
 }
@@ -28,7 +29,14 @@ func (t *Task) Subtasks() []*Task {
 // Close closes a task.
 func (t *Task) Close() error {
 	endpoint := fmt.Sprintf("tasks/%d/close", t.id)
-	_, err := t.client.httpPost(endpoint, nil)
+	httpMethod := t.client.httpPost
+
+	if t.parentID != nil {
+		endpoint = fmt.Sprintf("tasks/%d", t.id)
+		httpMethod = t.client.httpDelete
+	}
+
+	_, err := httpMethod(endpoint, nil)
 	if err != nil {
 		return newError(err)
 	}

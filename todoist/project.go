@@ -30,9 +30,10 @@ type unmarshalTask struct {
 
 func (p *Project) newTask(temp *unmarshalTask) *Task {
 	return &Task{
-		name:   temp.Content,
-		id:     temp.ID,
-		client: p.client,
+		name:     temp.Content,
+		id:       temp.ID,
+		parentID: temp.Parent,
+		client:   p.client,
 	}
 }
 
