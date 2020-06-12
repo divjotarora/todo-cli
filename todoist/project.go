@@ -50,6 +50,8 @@ func (p *Project) Tasks() ([]*Task, error) {
 		return nil, newError(err)
 	}
 
+	// Do one iteration to convert the unmarshalled slice into a slice of Task instances and find all of the top-level
+	// tasks.
 	tasksMap := make(map[int64]*Task)
 	var tasks []*Task
 	for _, temp := range unmarshalled {
@@ -58,11 +60,18 @@ func (p *Project) Tasks() ([]*Task, error) {
 
 		if temp.Parent == nil {
 			tasks = append(tasks, newTask)
+		}
+	}
+
+	// Do another iteration to add subtasks to their parent's subtasks slice. This has to be done separately from the
+	// iteration above because the parent task might appear after the subtask in the API response.
+	for _, task := range tasksMap {
+		if task.parentID == nil {
 			continue
 		}
 
-		parent := tasksMap[*temp.Parent]
-		parent.subtasks = append(parent.subtasks, newTask)
+		parent := tasksMap[*task.parentID]
+		parent.subtasks = append(parent.subtasks, task)
 	}
 
 	return tasks, nil
