@@ -16,8 +16,6 @@ const (
 )
 
 func (c *Client) httpRequest(method, endpoint string, body map[string]interface{}) ([]byte, error) {
-	httpClient := &http.Client{}
-
 	var bodyBuffer io.Reader
 	if body != nil {
 		bodyBytes, err := json.Marshal(body)
@@ -38,7 +36,7 @@ func (c *Client) httpRequest(method, endpoint string, body map[string]interface{
 		req.Header.Add("Content-Type", "application/json")
 	}
 
-	res, err := httpClient.Do(req)
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
